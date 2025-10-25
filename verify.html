@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Archive Verification</title>
+  <style>
+    body { background:#0b0b0b; color:#dfe; font-family:monospace; padding:2rem; }
+    .panel{background:#111; padding:1rem; border-radius:6px; max-width:680px}
+    input{width:100%; padding:.6rem; margin:.4rem 0; font-size:1rem}
+    button{padding:.6rem 1rem; font-size:1rem}
+    .secret{margin-top:1rem; background:#072; padding:.6rem; border-radius:4px; display:none}
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <h2>Access Checkpoint</h2>
+    <p>Enter authorization phrase:</p>
+    <input id="phrase" placeholder="enter phrase..." autofocus />
+    <button id="check">Submit</button>
+    <div id="result" class="secret"></div>
+  </div>
+
+  <script>
+  const expectedHash = "5ea4a2bf3e61a4183c4f17ec122c8cca528fa25c360322e5afc01fd4ce85d6a2"; // sha256("found you")
+  async function sha256Hex(text){
+    const enc = new TextEncoder();
+    const data = enc.encode(text);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  document.getElementById('check').addEventListener('click', async ()=>{
+    const raw = document.getElementById('phrase').value || '';
+    const normalized = raw.trim().toLowerCase();
+    const h = await sha256Hex(normalized);
+    const result = document.getElementById('result');
+    result.style.display='block';
+    if(h === expectedHash){
+      result.textContent = "ACCESS TOKEN: WATCH-0427\nNEXT LINK: logs/log2.html";
+    } else {
+      result.textContent = "Invalid phrase. Try again.";
+      result.style.background='#420';
+    }
+  });
+  </script>
+</body>
+</html>
