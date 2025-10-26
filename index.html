@@ -32,62 +32,7 @@
   </style>
 </head>
 <body>
-  <div id="lockedArea">
-        <p>Archive access is currently locked. <br/>
-        To begin, use the External Breach Utility.</p>
-        <p><a href="hack.html">Start Breach Utility</a></p>
-      </div>
-
-      <div class="notice" id="note"></div>
-    </div>
-  </div>
-
-<script>
-// Helpers to parse token from fragment and persist to localStorage
-function parseTokenFromHash(){
-  const h = location.hash || "";
-  const m = h.match(/token=([^&]+)/i);
-  return m ? decodeURIComponent(m[1]) : null;
-}
-
-// retrieve token from either fragment or localStorage
-function getToken(){
-  const fromHash = parseTokenFromHash();
-  if(fromHash){
-    // store for future navigation
-    localStorage.setItem('archive_token', fromHash);
-    // remove token from URL for cleanliness (optional)
-    history.replaceState(null, '', location.pathname + location.search);
-    return fromHash;
-  }
-  // fallback to localStorage
-  return localStorage.getItem('archive_token');
-}
-
-// call on load
-window.addEventListener('load', ()=>{
-  const token = getToken();
-  const linksArea = document.getElementById('linksArea');
-  const lockedArea = document.getElementById('lockedArea');
-  const note = document.getElementById('note');
-  if(token){
-    // reveal the hub links, embedding the token in the fragment of each
-    const linkLogs = document.getElementById('linkLogs');
-    const linkVerify = document.getElementById('linkVerify');
-    // set appropriate relative paths to your files
-    linkLogs.href = 'logs/log1.html#token=' + encodeURIComponent(token);
-    linkVerify.href = 'verify.html#token=' + encodeURIComponent(token);
-    linksArea.style.display = 'block';
-    lockedArea.style.display = 'none';
-    note.textContent = 'Access token detected. Links are live. Token (kept in browser storage) will be used to authenticate nodes.';
-  } else {
-    linksArea.style.display = 'none';
-    lockedArea.style.display = 'block';
-    note.textContent = 'Access locked. Use the breach utility to acquire a token.';
-  }
-});
-</script>
-</body>
+  </body>
   <div class="term">
     <h2>Delomina City Surveillance Archive</h2>
     <p id="lockedNote">Archive partially restricted. Use the <a href="verify.html">Verification Console</a> to unlock classified files.</p>
@@ -134,5 +79,64 @@ window.addEventListener('load', ()=>{
 
   renderUnlocked();
   </script>
+</body>
+// ---------- Config ----------
+const LINKS = {
+  log1: 'logs/nv-13_field_report.html',
+  verify: 'verify.html'
+};
+
+// ---------- Helpers ----------
+function parseTokenFromHash(){
+  const h = location.hash || '';
+  const m = h.match(/token=([^&]+)/i);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+function getToken(){
+  const fromHash = parseTokenFromHash();
+  if(fromHash){
+    localStorage.setItem('delomina_archive_token', fromHash);
+    history.replaceState(null, '', location.pathname + location.search);
+    return fromHash;
+  }
+  return localStorage.getItem('delomina_archive_token');
+}
+function clearToken(){
+  localStorage.removeItem('delomina_archive_token');
+  location.reload();
+}
+
+// ---------- UI ----------
+const linksList = document.getElementById('linksList');
+const lockedNote = document.getElementById('lockedNote');
+const startBreach = document.getElementById('startBreach');
+const linkLog1 = document.getElementById('linkLog1');
+const linkVerify = document.getElementById('linkVerify');
+const clearBtn = document.getElementById('clearToken');
+const statusEl = document.getElementById('status');
+
+window.addEventListener('load', ()=>{
+  const token = getToken();
+  if(token){
+    linksList.style.display = 'block';
+    lockedNote.style.display = 'none';
+    startBreach.style.display = 'none';
+    linkLog1.href = LINKS.log1 + '#token=' + encodeURIComponent(token);
+    linkVerify.href = LINKS.verify + '#token=' + encodeURIComponent(token);
+    clearBtn.style.display = 'inline-block';
+    statusEl.innerHTML = `ACCESS TOKEN <span class="blink">[ ${token} ]</span> VALID — ARCHIVE PORTAL READY`;
+  } else {
+    linksList.style.display = 'none';
+    lockedNote.style.display = 'block';
+    startBreach.style.display = 'block';
+    clearBtn.style.display = 'none';
+    statusEl.textContent = '';
+  }
+});
+
+clearBtn.addEventListener('click', ()=>{
+  if(confirm('Clear stored access token?')) clearToken();
+});
+</script>
 </body>
 </html>
