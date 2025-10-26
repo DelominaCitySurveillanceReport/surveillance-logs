@@ -114,16 +114,16 @@ submitBtn.addEventListener('click', async ()=>{
   const ok = await checkAnswer(raw);
   const success = await fakeBreachSequence(ok);
   if(success && ok){
-    appendLine('ACCESS GRANTED — opening portal (read-only)', '#7f7');
-    // reveal the logs link (relative)
-    resultArea.innerHTML = '';
-    const link = document.createElement('a');
-    link.href = 'logs/log1.html';  // adjust to your log's URL if different
-    link.className = 'reveal';
-    link.textContent = 'ENTER DELÓMINA ARCHIVES';
-    resultArea.appendChild(link);
-    appendLine('note: portal is ephemeral. Use link quickly.', '#9aa');
-  } else {
+  appendLine('ACCESS GRANTED — generating access token', '#7f7');
+  const token = 'WATCH-0427'; // this is your chosen access token
+  appendLine('token id: ' + token, '#9fe');
+  appendLine('Redirecting to central index...', '#7ff');
+  resultArea.innerHTML = "<div style='color:#7ef2b4; margin-top:8px'>ACCESS GRANTED<br/>Redirecting...</div>";
+  setTimeout(()=>{
+    // redirect to index.html and pass token in URL fragment
+    window.location.href = 'index.html#token=' + encodeURIComponent(token);
+  }, 1500);
+} else {
     failCount++;
     appendLine('ACCESS DENIED', '#f55');
     if(failCount >= 3){
