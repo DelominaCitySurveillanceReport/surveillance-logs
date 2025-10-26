@@ -32,14 +32,13 @@
   </style>
 </head>
 <body>
-  </body>
   <div class="term">
     <h2>Delomina City Surveillance Archive</h2>
     <p id="lockedNote">Archive partially restricted. Use the <a href="verify.html">Verification Console</a> to unlock classified files.</p>
 
     <ul id="fileList">
-      <li><a href="logs/nv-13_field_report.html">[NV-13] Field Report</a></li>
-      <li><a href="logs/bw-05_visual_report.html">[BW-05] Visual Report</a></li>
+      <li><a href="logs/nv-13_field_report.html">[NV-13] Estella — Field Report</a></li>
+      <!-- Hidden files will appear here dynamically -->
     </ul>
 
     <p><button id="clearToken" style="display:none;">Clear access data</button></p>
@@ -47,7 +46,7 @@
 
   <script>
   const FILES = {
-    alex: { label: "[CD-11] Subject File — Access Granted", href: "logs/cd-11_file.html" }
+    alex: { label: "[A-CRESTON] Subject File — Access Granted", href: "logs/alex_file.html" }
     // Add more later: orla, dennis, etc.
   };
 
@@ -80,63 +79,5 @@
   renderUnlocked();
   </script>
 </body>
-// ---------- Config ----------
-const LINKS = {
-  log1: 'logs/nv-13_field_report.html',
-  verify: 'verify.html'
-};
-
-// ---------- Helpers ----------
-function parseTokenFromHash(){
-  const h = location.hash || '';
-  const m = h.match(/token=([^&]+)/i);
-  return m ? decodeURIComponent(m[1]) : null;
-}
-function getToken(){
-  const fromHash = parseTokenFromHash();
-  if(fromHash){
-    localStorage.setItem('delomina_archive_token', fromHash);
-    history.replaceState(null, '', location.pathname + location.search);
-    return fromHash;
-  }
-  return localStorage.getItem('delomina_archive_token');
-}
-function clearToken(){
-  localStorage.removeItem('delomina_archive_token');
-  location.reload();
-}
-
-// ---------- UI ----------
-const linksList = document.getElementById('linksList');
-const lockedNote = document.getElementById('lockedNote');
-const startBreach = document.getElementById('startBreach');
-const linkLog1 = document.getElementById('linkLog1');
-const linkVerify = document.getElementById('linkVerify');
-const clearBtn = document.getElementById('clearToken');
-const statusEl = document.getElementById('status');
-
-window.addEventListener('load', ()=>{
-  const token = getToken();
-  if(token){
-    linksList.style.display = 'block';
-    lockedNote.style.display = 'none';
-    startBreach.style.display = 'none';
-    linkLog1.href = LINKS.log1 + '#token=' + encodeURIComponent(token);
-    linkVerify.href = LINKS.verify + '#token=' + encodeURIComponent(token);
-    clearBtn.style.display = 'inline-block';
-    statusEl.innerHTML = `ACCESS TOKEN <span class="blink">[ ${token} ]</span> VALID — ARCHIVE PORTAL READY`;
-  } else {
-    linksList.style.display = 'none';
-    lockedNote.style.display = 'block';
-    startBreach.style.display = 'block';
-    clearBtn.style.display = 'none';
-    statusEl.textContent = '';
-  }
-});
-
-clearBtn.addEventListener('click', ()=>{
-  if(confirm('Clear stored access token?')) clearToken();
-});
-</script>
-</body>
 </html>
+
