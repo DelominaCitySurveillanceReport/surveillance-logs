@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Delomina Archives — Breach Utility</title>
+<style>
+  :root{--bg:#030305;--text:#cfe8df;--accent:#7be3b2;}
+  body{background:linear-gradient(180deg,#030305 0%, #071018 100%); color:var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; padding:28px;}
+  .term{background:#02030a; border:1px solid rgba(127,255,200,0.06); padding:18px; border-radius:8px; max-width:920px; margin:0 auto; box-shadow:0 8px 40px rgba(0,0,0,0.6);}
+  h1{color:var(--accent); margin:0 0 6px 0; font-size:20px}
+  p.lead{color:#9fbfb0; margin:0 0 10px 0}
+  #console{background:#000; padding:14px; border-radius:6px; min-height:240px; color:#7ef2b4; font-size:13px; line-height:1.5; overflow:auto;}
+  .controls{margin-top:10px; display:flex; gap:8px;}
+  input[type="text"]{flex:1; padding:8px 10px; background:#051018; color:var(--text); border:1px solid #073; border-radius:4px; font-family:inherit}
+  button{padding:8px 12px; border-radius:6px; background:#073; color:#001; border:0; cursor:pointer; font-weight:700}
+  .foot{color:#6f9; font-size:12px; margin-top:12px}
+  .hint{color:#9aa; font-size:13px; margin-top:8px}
+  a.reveal{display:inline-block; margin-top:12px; padding:8px 10px; background:#0a2740; color:#9be; border-radius:6px; text-decoration:none}
+  small.meta{display:block; color:#556; margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="term">
+    <h1>Delomina Archives — External Breach Utility</h1>
+    <p class="lead">Simulated access console. This utility will attempt to open a read-only portal into the city archives. Provide the required clearance phrase to proceed.</p>
+
+    <div id="console" role="log" aria-live="polite">
+      <div>> initializing connection to delomina-archive-gateway...</div>
+      <div>> handshake OK — ephemeral token acquired</div>
+      <div>> checking outer firewall signatures...</div>
+      <div id="log-placeholder">> security prompt ready.</div>
+    </div>
+
+    <div class="controls">
+      <input id="answer" type="text" placeholder="Type the clearance phrase..." autocomplete="off" />
+      <button id="submit">Submit</button>
+    </div>
+
+    <div class="hint">Riddle: <em>"He slips through palms and pauses all things. Though king and pauper watch him, none hold him close."</em></div>
+    <div class="foot"><small class="meta">Tip: answer is a single word. All input is case-insensitive.</small></div>
+
+    <div id="resultArea" style="margin-top:12px"></div>
+  </div>
+
+<script>
+/*
+  Client-side SHA-256 check. The answer currently is "time".
+  SHA256("time") = 336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e
+  If you want to change the expected phrase, replace expectedHash with the SHA-256 of your chosen word.
+*/
+const expectedHash = "336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e";
+
+const consoleEl = document.getElementById('console');
+const logPlaceholder = document.getElementById('log-placeholder');
+const answerInput = document.getElementById('answer');
+const submitBtn = document.getElementById('submit');
+const resultArea = document.getElementById('resultArea');
+
+let failCount = 0;
+
+function appendLine(text, color){
+  const d = document.createElement('div');
+  if(color) d.style.color = color;
+  d.textContent = '> ' + text;
+  consoleEl.appendChild(d);
+  consoleEl.scrollTop = consoleEl.scrollHeight;
+}
+
+// small helper to compute sha256 hex in browser
+async function sha256Hex(msg){
+  const enc = new TextEncoder();
+  const data = enc.encode(msg);
+  const buf = await crypto.subtle.digest('SHA-256', data);
+  const arr = Array.from(new Uint8Array(buf));
+  return arr.map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// fake progress animation for immersion
+function fakeBreachSequence(success){
+  appendLine('bypassing firewall modules...', '#9fe');
+  return new Promise(res=>{
+    setTimeout(()=>{
+      appendLine('decrypting index shards...', '#9fe');
+      setTimeout(()=>{
+        appendLine('reassembling metadata tables...', '#9fe');
+        setTimeout(()=>{
+          if(success){
+            appendLine('access token validated — mounting read-only view', '#7ff');
+            res(true);
+          } else {
+            appendLine('validation failed — token rejected', '#f77');
+            res(false);
+          }
+        }, 800);
+      }, 800);
+    }, 800);
+  });
+}
+
+async function checkAnswer(raw){
+  const norm = raw.trim().toLowerCase();
+  if(!norm) return null;
+  appendLine('computing integrity hash for input...');
+  const h = await sha256Hex(norm);
+  // debug: console.log(h);
+  const ok = (h === expectedHash);
+  return ok;
+}
+
+submitBtn.addEventListener('click', async ()=>{
+  const raw = answerInput.value || '';
+  appendLine('received input — initiating validation');
+  const ok = await checkAnswer(raw);
+  const success = await fakeBreachSequence(ok);
+  if(success && ok){
+    appendLine('ACCESS GRANTED — opening portal (read-only)', '#7f7');
+    // reveal the logs link (relative)
+    resultArea.innerHTML = '';
+    const link = document.createElement('a');
+    link.href = 'logs/log1.html';  // adjust to your log's URL if different
+    link.className = 'reveal';
+    link.textContent = 'ENTER DELÓMINA ARCHIVES';
+    resultArea.appendChild(link);
+    appendLine('note: portal is ephemeral. Use link quickly.', '#9aa');
+  } else {
+    failCount++;
+    appendLine('ACCESS DENIED', '#f55');
+    if(failCount >= 3){
+      appendLine('security hint: the thing you seek slips through every hand — think of seconds and kings', '#9aa');
+    }
+    // small deterrent: disable briefly
+    submitBtn.disabled = true;
+    setTimeout(()=> submitBtn.disabled = false, 1600);
+  }
+});
+
+// allow hitting Enter
+answerInput.addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter') submitBtn.click();
+});
+</script>
+</body>
+</html>
