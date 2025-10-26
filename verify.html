@@ -1,90 +1,114 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Delomina Archives — Verification Console</title>
-<style>
-  :root{ --bg:#030305; --panel:#02030a; --accent:#7be3b2; --text:#dfe; --muted:#9aa;}
-  body{background:radial-gradient(circle at top,#010203 0%, #060c12 100%); color:var(--text); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; padding:28px;}
-  .term{max-width:820px;margin:0 auto;background:var(--panel); padding:18px; border-radius:8px; border:1px solid rgba(127,255,200,0.06); box-shadow:0 8px 40px rgba(0,0,0,0.6);}
-  h2{color:var(--accent); margin:0 0 8px 0; font-size:20px}
-  p.lead{color:var(--muted); margin:0 0 12px 0}
-  label{display:block; color:var(--muted); margin-bottom:6px}
-  input{width:100%; padding:.7rem; margin:.2rem 0; font-size:1rem; background:#051018; color:var(--text); border:1px solid #073; border-radius:6px; box-sizing:border-box}
-  button{padding:.6rem 1rem; font-size:1rem; background:#073; color:#001; border:0; border-radius:6px; cursor:pointer; font-weight:700}
-  .result{margin-top:12px; padding:10px; border-radius:6px; display:none}
-  .ok{background:#072; color:#cfe}
-  .bad{background:#420; color:#ffd}
-  a.reveal{display:inline-block; margin-top:8px; padding:8px 10px; background:#0a2740; color:#9be; border-radius:6px; text-decoration:none}
-  small.hint{display:block; color:var(--muted); margin-top:8px}
-</style>
+  <meta charset="utf-8" />
+  <title>Archive Verification Console</title>
+  <style>
+    :root {
+      --bg: #030305;
+      --accent: #7be3b2;
+      --text: #cfe8df;
+    }
+    body {
+      background: linear-gradient(180deg, #030305 0%, #071018 100%);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+      padding: 32px;
+    }
+    .term {
+      background: #02030a;
+      border: 1px solid rgba(127,255,200,0.06);
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 760px;
+      margin: 0 auto;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    }
+    h2 { color: var(--accent); margin-top: 0; }
+    input, button {
+      font-family: inherit;
+      font-size: 1rem;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #064;
+      background: #041018;
+      color: var(--text);
+      margin-right: 8px;
+    }
+    button {
+      background: var(--accent);
+      color: #000;
+      border: 0;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #result {
+      margin-top: 14px;
+      padding: 10px;
+      border-radius: 6px;
+      background: #02150e;
+      white-space: pre-wrap;
+      display: none;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
-  <div class="term" role="main" aria-labelledby="heading">
-    <h2 id="heading">Archive Verification Console</h2>
-    <p class="lead">Submit a recovered code or phrase from the archives. Verified codes register local access tokens for related files.</p>
-
-    <label for="phrase">Authorization phrase</label>
+  <div class="term">
+    <h2>Archive Verification Console</h2>
+    <p>Input authorization phrase to unlock classified records.</p>
     <input id="phrase" placeholder="enter phrase..." autofocus />
-    <div style="height:8px"></div>
     <button id="check">Submit</button>
-
-    <div id="result" class="result" role="status"></div>
-
+    <div id="result"></div>
   </div>
 
-<script>
-/* SHA-256 check for the phrase "found you" (lowercase, trimmed)
-   sha256("found you") = 5ea4a2bf3e61a4183c4f17ec122c8cca528fa25c360322e5afc01fd4ce85d6a2
-*/
-const expectedHash = "5ea4a2bf3e61a4183c4f17ec122c8cca528fa25c360322e5afc01fd4ce85d6a2";
-const resultEl = document.getElementById('result');
-const inputEl = document.getElementById('phrase');
-const btn = document.getElementById('check');
-
-async function sha256Hex(text){
-  const enc = new TextEncoder();
-  const data = enc.encode(text);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-async function handleSubmit(){
-  const raw = (inputEl.value || '').trim().toLowerCase();
-  if(!raw){
-    resultEl.style.display = 'block';
-    resultEl.className = 'result bad';
-    resultEl.textContent = 'Enter a phrase to validate.';
-    return;
-  }
-
-  resultEl.style.display = 'block';
-  resultEl.className = 'result';
-  resultEl.textContent = 'Verifying...';
-
-  try{
-    const h = await sha256Hex(raw);
-    if(h === expectedHash){
-      // success: register flag in localStorage and show link to Alex
-      localStorage.setItem('code_foundyou','1');
-      resultEl.className = 'result ok';
-      resultEl.innerHTML = 'PHRASE VERIFIED — ACCESS FLAG REGISTERED.<br/><a class="reveal" href="logs/alex_creston.html#code=foundyou">Open A-03 — Alex Creston (Unlocked)</a>';
-    } else {
-      resultEl.className = 'result bad';
-      resultEl.textContent = 'Invalid phrase. Try again.';
+  <script>
+  // Map of phrases → unlock keys + messages
+  const UNLOCKS = {
+    "found you": {
+      hash: "5ea4a2bf3e61a4183c4f17ec122c8cca528fa25c360322e5afc01fd4ce85d6a2", // SHA-256("found you")
+      key: "alex",
+      msg: "ACCESS GRANTED — Subject file unlocked: CD-11\nReturn to main archive to review."
     }
-  } catch(e){
-    resultEl.className = 'result bad';
-    resultEl.textContent = 'Verification failed (crypto error).';
-    console.error(e);
-  }
-}
+  };
 
-// click + Enter support
-btn.addEventListener('click', handleSubmit);
-inputEl.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') handleSubmit(); });
-</script>
+  async function sha256Hex(text){
+    const enc = new TextEncoder();
+    const data = enc.encode(text);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+
+  document.getElementById('check').addEventListener('click', async ()=>{
+    const input = document.getElementById('phrase').value.trim().toLowerCase();
+    const result = document.getElementById('result');
+    if(!input) return;
+
+    result.style.display = 'block';
+    result.style.color = '#9fe';
+    result.textContent = '> verifying input...';
+
+    const hash = await sha256Hex(input);
+    const match = Object.values(UNLOCKS).find(u => u.hash === hash);
+
+    if(match){
+      // store unlock key
+      const unlocked = JSON.parse(localStorage.getItem('delomina_unlocked') || "[]");
+      if(!unlocked.includes(match.key)){
+        unlocked.push(match.key);
+        localStorage.setItem('delomina_unlocked', JSON.stringify(unlocked));
+      }
+      result.style.color = '#7f7';
+      result.textContent = match.msg + "\n\n> Return to index.html to proceed.";
+    } else {
+      result.style.color = '#f77';
+      result.textContent = "ACCESS DENIED — invalid phrase.\nHint: cross-reference intercepted NV data.";
+    }
+  });
+  </script>
 </body>
 </html>
