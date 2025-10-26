@@ -17,7 +17,7 @@
 </head>
 <body>
   <div class="card">
-    <h1>FILE: A-03 — Alex Creston</h1>
+    <h1>FILE: CD-11 </h1>
     <h3>CLASSIFICATION: CONFIDENTIAL — INVESTIGATIONS</h3>
 
     <pre id="log">
@@ -44,21 +44,11 @@ FOR INTERNAL ANALYSTS:
     </pre>
 
     <div class="meta">
-      ANALYST NOTE: suspicious entries flagged. There is a checksum in the file header (hex) that requires translation.
+      ANALYST NOTE: suspicious entries flagged. There is a checksum in the file header that requires translation.
     </div>
 
-    <div class="hint">
-      Tip: minutes in the audit trace may map to alphabetic indices (A=1).
-    </div>
 
-    <!-- Hidden hex dump (ciphertext in ASCII hex)
-         4A4652474B4446594657
-         (hex → ASCII => "JFRGKDFYFW" which is Vigenère ciphertext)
-    -->
-
-    <!-- TEST HELPERS (UNCOMMENT FOR DEBUG / TESTING ONLY)
-    <button id="revealKey" class="testBtn">DEBUG: show key (minutes→letters)</button>
-    <button id="revealCipher" class="testBtn">DEBUG: reveal ciphertext</button>
+    <!-- 4A4652474B4446594657
     -->
 
     <div class="lockedNote">
@@ -67,18 +57,14 @@ FOR INTERNAL ANALYSTS:
   </div>
 
 <script>
-/* --- OPTIONAL debug helpers (commented out visually above)
-   If you ever need to test quickly, uncomment the two buttons in the HTML above.
-   Below code supports them but will do nothing until button elements are present. */
 
 // utility: convert minute list to key (A=1)
 function extractKeyFromTimestamps(){
-  // replicate the minute sequence from the log: 03,18,05,19,20
+  
   const minutes = [3,18,5,19,20];
-  return minutes.map(n => String.fromCharCode(64 + n)).join(''); // 1->A -> char code: 65
+  return minutes.map(n => String.fromCharCode(64 + n)).join(''); 
 }
 
-// Vigenere decrypt A=0 mapping
 function vigenereDecrypt(cipher, key){
   const A = 'A'.charCodeAt(0);
   cipher = cipher.toUpperCase().replace(/[^A-Z]/g,'');
@@ -93,17 +79,10 @@ function vigenereDecrypt(cipher, key){
   return out;
 }
 
-// hex to ascii
 function hexToAscii(hex){
   const bytes = hex.match(/.{1,2}/g) || [];
   return bytes.map(b => String.fromCharCode(parseInt(b,16))).join('');
 }
-
-/* Example (for your testing only):
-   hex "4A4652474B4446594657" -> ascii "JFRGKDFYFW"
-   key from timestamps -> "CREST"
-   vigenereDecrypt("JFRGKDFYFW","CREST") -> "HONORBOUND"
-*/
 
 </script>
 </body>
