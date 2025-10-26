@@ -1,199 +1,82 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Delomina Archives — Access Hub</title>
-<style>
-  :root {
-    --bg:#030305;
-    --text:#b0f5c8;
-    --accent:#7be3b2;
-  }
-  body {
-    background: radial-gradient(circle at top, #010203 0%, #060c12 100%);
-    color: var(--text);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
-    padding: 28px;
-  }
-  .term {
-    background: #02030a;
-    border: 1px solid rgba(127,255,200,0.06);
-    padding: 18px;
-    border-radius: 8px;
-    max-width: 800px;
-    margin: 40px auto;
-    box-shadow: 0 0 30px rgba(0,255,160,0.05);
-  }
-  h2 {
-    color: var(--accent);
-    font-size: 20px;
-    margin-bottom: 8px;
-  }
-  p, li, a {
-    color: var(--text);
-    font-size: 14px;
-  }
-  ul {
-    list-style: none;
-    padding-left: 0;
-  }
-  li { margin-bottom: 6px; }
-  a {
-    color: var(--accent);
-    text-decoration: none;
-  }
-  a:hover {
-    color: #afffd7;
-    text-decoration: underline;
-  }
-  #lockedNote {
-    color: #9bf;
-    font-size: 13px;
-    margin: 8px 0;
-  }
-  #startBreach a {
-    background: #0a2740;
-    color: #9be;
-    padding: 8px 12px;
-    border-radius: 6px;
-    text-decoration: none;
-    display: inline-block;
-    margin-top: 8px;
-  }
-  #startBreach a:hover { background: #11385e; }
-  #clearToken {
-    background: #051018;
-    border: 1px solid #073;
-    color: #9ef;
-    border-radius: 4px;
-    padding: 6px 10px;
-    cursor: pointer;
-    margin-top: 12px;
-  }
-  #clearToken:hover {
-    background: #073;
-    color: #010;
-  }
-  .blink {
-    animation: blink 1s step-end infinite;
-  }
-  @keyframes blink { 50% { opacity: 0; } }
-
-  #boot {
-    color: #7ef2b4;
-    font-size: 13px;
-    background: #000;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-    line-height: 1.4;
-    min-height: 120px;
-    white-space: pre-wrap;
-    overflow: hidden;
-  }
-</style>
+  <meta charset="utf-8"/>
+  <title>Delomina City Surveillance Archive</title>
+  <style>
+    body {
+      background: linear-gradient(180deg, #030305 0%, #071018 100%);
+      color: #cfe8df;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+      padding: 28px;
+    }
+    .term {
+      background:#02030a;
+      border:1px solid rgba(127,255,200,0.06);
+      padding:18px;
+      border-radius:8px;
+      max-width:880px;
+      margin:0 auto;
+      box-shadow:0 8px 40px rgba(0,0,0,0.6);
+    }
+    h2 { color:#7be3b2; margin-top:0; }
+    ul { list-style-type:none; padding-left:0; }
+    li { margin-bottom:6px; }
+    a { color:#7be3b2; text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    #lockedNote { color:#999; }
+    button {
+      background:#073; color:#000; border:0; border-radius:6px;
+      padding:8px 12px; cursor:pointer; font-weight:bold;
+    }
+  </style>
 </head>
 <body>
   <div class="term">
-    <div id="boot"></div>
-    <h2 style="display:none;">Delomina City Surveillance Archive</h2>
-    <p id="lockedNote" style="display:none;">[ ACCESS LOCKED ] — please return to breach utility to obtain clearance.</p>
+    <h2>Delomina City Surveillance Archive</h2>
+    <p id="lockedNote">Archive partially restricted. Use the <a href="verify.html">Verification Console</a> to unlock classified files.</p>
 
-    <ul id="linksList" style="display:none;">
-      <li><a id="linkLog1" href="logs/nv-13_field_report.html">NV-13 Field Report</a></li>
-      <li><a id="linkVerify" href="verify.html">Phrase Check</a></li>
+    <ul id="fileList">
+      <li><a href="logs/nv-13_field_report.html">[NV-13] Estella — Field Report</a></li>
+      <!-- Hidden files will appear here dynamically -->
     </ul>
 
-    <p id="startBreach" style="display:none;margin-top:8px;">
-      <a href="hack.html">Open Breach Utility</a>
-    </p>
-
-    <button id="clearToken" style="display:none;">Clear Access Token</button>
-
-    <div id="status" style="margin-top:12px; color:#6f9; font-size:13px;"></div>
+    <p><button id="clearToken" style="display:none;">Clear access data</button></p>
   </div>
 
-<script>
-// ---------- Boot-up Terminal Effect ----------
-const boot = document.getElementById('boot');
-const lines = [
-  '> Initializing Delomina Archive Interface...',
-  '> Establishing encrypted connection to gateway...',
-  '> Verifying external breach token...',
-  '> Access node confirmed.',
-  '> Loading modules: [CORE] [SURVEILLANCE] [ARCHIVE_VIEWER]',
-  '> Boot sequence complete.'
-];
-let i = 0;
-function typeLine() {
-  if (i < lines.length) {
-    boot.textContent += lines[i++] + '\n';
-    setTimeout(typeLine, 500);
-  } else {
-    document.querySelector('h2').style.display = 'block';
-    setupAccessUI();
-  }
-}
-setTimeout(typeLine, 800);
-
-// ---------- Main Access Logic ----------
-function setupAccessUI() {
-  const LINKS = {
-    log1: 'logs/nv-13_field_report.html',
-    verify: 'verify.html'
+  <script>
+  const FILES = {
+    alex: { label: "[A-CRESTON] Subject File — Access Granted", href: "logs/alex_file.html" }
+    // Add more later: orla, dennis, etc.
   };
 
-  function parseTokenFromHash(){
-    const h = location.hash || '';
-    const m = h.match(/token=([^&]+)/i);
-    return m ? decodeURIComponent(m[1]) : null;
+  function renderUnlocked(){
+    const list = document.getElementById('fileList');
+    const unlocked = JSON.parse(localStorage.getItem('delomina_unlocked') || "[]");
+    const clearBtn = document.getElementById('clearToken');
+
+    if(unlocked.length > 0) clearBtn.style.display = 'inline-block';
+
+    unlocked.forEach(key=>{
+      if(FILES[key]){
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = FILES[key].href;
+        a.textContent = FILES[key].label;
+        li.appendChild(a);
+        list.appendChild(li);
+      }
+    });
   }
-  function getToken(){
-    const fromHash = parseTokenFromHash();
-    if(fromHash){
-      localStorage.setItem('delomina_archive_token', fromHash);
-      history.replaceState(null, '', location.pathname + location.search);
-      return fromHash;
+
+  document.getElementById('clearToken').addEventListener('click', ()=>{
+    if(confirm("Clear all stored unlocks?")) {
+      localStorage.removeItem('delomina_unlocked');
+      location.reload();
     }
-    return localStorage.getItem('delomina_archive_token');
-  }
-  function clearToken(){
-    localStorage.removeItem('delomina_archive_token');
-    location.reload();
-  }
-
-  const linksList = document.getElementById('linksList');
-  const lockedNote = document.getElementById('lockedNote');
-  const startBreach = document.getElementById('startBreach');
-  const linkLog1 = document.getElementById('linkLog1');
-  const linkVerify = document.getElementById('linkVerify');
-  const clearBtn = document.getElementById('clearToken');
-  const statusEl = document.getElementById('status');
-
-  const token = getToken();
-  if(token){
-    linksList.style.display = 'block';
-    lockedNote.style.display = 'none';
-    startBreach.style.display = 'none';
-    linkLog1.href = LINKS.log1 + '#token=' + encodeURIComponent(token);
-    linkVerify.href = LINKS.verify + '#token=' + encodeURIComponent(token);
-    clearBtn.style.display = 'inline-block';
-    statusEl.innerHTML = `ACCESS TOKEN <span class="blink">[ ${token} ]</span> VALID — ARCHIVE PORTAL READY`;
-  } else {
-    linksList.style.display = 'none';
-    lockedNote.style.display = 'block';
-    startBreach.style.display = 'block';
-    clearBtn.style.display = 'none';
-  }
-
-  clearBtn.addEventListener('click', ()=>{
-    if(confirm('Clear stored access token?')) clearToken();
   });
 
-  lockedNote.style.display = 'block';
-  startBreach.style.display = 'block';
-}
-</script>
+  renderUnlocked();
+  </script>
 </body>
 </html>
