@@ -1,11 +1,95 @@
+<!doctype html>
 <html>
-<head><title>Surveillance Log Access</title></head>
-<body style="background:black;color:lime;font-family:monospace;">
-<h2>Delomina City Surveillance Archive</h2>
-<p>Logs available:</p>
-<ul>
-  <li><a href="logs/log1.html">Log 1</a></li>
-  <li><a href="verify.html">Phrase Check</a></li>
-</ul>
+<head>
+  <meta charset="utf-8"/>
+  <title>Surveillance Log Access</title>
+</head>
+<body style="background:black;color:lime;font-family:monospace; padding:18px;">
+  <h2>Delomina City Surveillance Archive</h2>
+
+  <!-- Hub area: normal links are present here but hidden until token is present -->
+  <div id="hub">
+    <p id="lockedNote">Archive access locked. Use the breach utility to obtain access.</p>
+
+    <ul id="linksList" style="display:none;">
+      <li><a id="linkLog1" href="logs/log1.html">Log 1</a></li>
+      <li><a id="linkVerify" href="verify.html">Phrase Check</a></li>
+    </ul>
+
+    <p id="startBreach" style="margin-top:8px;">
+      <a href="hack.html" style="color:lightgreen;">Start Breach Utility</a>
+    </p>
+
+    <p style="margin-top:10px;">
+      <button id="clearToken" style="background:#222;color:lime;border:1px solid #264;padding:6px 8px;border-radius:4px;cursor:pointer;display:none;">
+        Clear access token
+      </button>
+    </p>
+  </div>
+
+<script>
+// ---------- Config ----------
+const LINKS = {
+  log1: 'logs/log1.html',
+  verify: 'verify.html'
+};
+// ---------- Helpers ----------
+function parseTokenFromHash(){
+  const h = location.hash || '';
+  const m = h.match(/token=([^&]+)/i);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+function getToken(){
+  const fromHash = parseTokenFromHash();
+  if(fromHash){
+    // persist for navigation and remove fragment for neatness
+    localStorage.setItem('delomina_archive_token', fromHash);
+    // remove fragment from URL without reloading
+    history.replaceState(null, '', location.pathname + location.search);
+    return fromHash;
+  }
+  return localStorage.getItem('delomina_archive_token');
+}
+function clearToken(){
+  localStorage.removeItem('delomina_archive_token');
+  // simple page refresh to reset UI
+  location.reload();
+}
+
+// ---------- UI wiring ----------
+const linksList = document.getElementById('linksList');
+const lockedNote = document.getElementById('lockedNote');
+const startBreach = document.getElementById('startBreach');
+const linkLog1 = document.getElementById('linkLog1');
+const linkVerify = document.getElementById('linkVerify');
+const clearBtn = document.getElementById('clearToken');
+
+window.addEventListener('load', ()=>{
+  const token = getToken();
+  if(token){
+    // reveal links and attach token in fragment
+    linksList.style.display = 'block';
+    lockedNote.style.display = 'none';
+    startBreach.style.display = 'none';
+    // append token fragment to each link so downstream pages receive it
+    linkLog1.href = LINKS.log1 + '#token=' + encodeURIComponent(token);
+    linkVerify.href = LINKS.verify + '#token=' + encodeURIComponent(token);
+    clearBtn.style.display = 'inline-block';
+  } else {
+    // no token: keep hub locked
+    linksList.style.display = 'none';
+    lockedNote.style.display = 'block';
+    startBreach.style.display = 'block';
+    clearBtn.style.display = 'none';
+  }
+});
+
+// clear token handler
+clearBtn.addEventListener('click', ()=>{
+  if(confirm('Clear stored access token?')){
+    clearToken();
+  }
+});
+</script>
 </body>
 </html>
