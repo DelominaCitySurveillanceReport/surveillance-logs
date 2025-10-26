@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>CD-11 — File</title>
+<style>
+  body{background:#010204;color:#bff;font-family:ui-monospace,monospace;padding:36px}
+  .card{max-width:900px;margin:0 auto;background:#020810;padding:20px;border-radius:8px;border:1px solid #073;box-shadow:0 8px 40px rgba(0,0,0,0.4)}
+  h1{color:#7ef2b4;margin:0 0 6px 0}
+  h3{color:#9ff;margin:0 0 12px 0;font-weight:400}
+  pre{background:#000;padding:14px;border-radius:6px;color:#7ef2b4;line-height:1.5;overflow:auto}
+  .meta{color:#9aa;font-size:13px;margin-top:10px}
+  .lockedNote{background:#220;padding:10px;border-radius:6px;color:#fbc;margin-top:12px}
+  .hint{color:#9de;font-size:13px;margin-top:10px}
+  .testBtn{display:inline-block;margin-top:12px;padding:8px 10px;border-radius:6px;background:#073;color:#001;border:0;cursor:pointer}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1>FILE: A-03 — Alex Creston</h1>
+    <h3>CLASSIFICATION: CONFIDENTIAL — INVESTIGATIONS</h3>
+
+    <pre id="log">
+SUBJECT: CD-11
+AGE: 18
+RESIDENCE: CASSIA DISTRICT
+STATUS: under review
+
+ENTRY 001 — 2025-10-11 03:03:12 — Audit Trace
+  03:03:12 — payroll reconcile started
+  03:18:07 — ledger balance check
+  03:05:41 — external transfer queued
+  03:19:33 — training stipend cleared
+  03:20:02 — subsidiary account ping
+
+ENTRY 002 — 2025-10-11 04:02:05 — Behavioral Notes
+  - Silent demeanor during interviews.
+  - Training records: extensive.
+  - Family: high standing; public donations to city guard.
+
+FOR INTERNAL ANALYSTS:
+  - Cross-reference "Crest" entries in CD-11 financials.
+  - Check payroll timestamps for hidden tags.
+    </pre>
+
+    <div class="meta">
+      ANALYST NOTE: suspicious entries flagged. There is a checksum in the file header (hex) that requires translation.
+    </div>
+
+    <div class="hint">
+      Tip: minutes in the audit trace may map to alphabetic indices (A=1).
+    </div>
+
+    <!-- Hidden hex dump (ciphertext in ASCII hex)
+         4A4652474B4446594657
+         (hex → ASCII => "JFRGKDFYFW" which is Vigenère ciphertext)
+    -->
+
+    <!-- TEST HELPERS (UNCOMMENT FOR DEBUG / TESTING ONLY)
+    <button id="revealKey" class="testBtn">DEBUG: show key (minutes→letters)</button>
+    <button id="revealCipher" class="testBtn">DEBUG: reveal ciphertext</button>
+    -->
+
+    <div class="lockedNote">
+      Access to sensitive fiscal attachments removed. Use verified console for deeper access.
+    </div>
+  </div>
+
+<script>
+/* --- OPTIONAL debug helpers (commented out visually above)
+   If you ever need to test quickly, uncomment the two buttons in the HTML above.
+   Below code supports them but will do nothing until button elements are present. */
+
+// utility: convert minute list to key (A=1)
+function extractKeyFromTimestamps(){
+  // replicate the minute sequence from the log: 03,18,05,19,20
+  const minutes = [3,18,5,19,20];
+  return minutes.map(n => String.fromCharCode(64 + n)).join(''); // 1->A -> char code: 65
+}
+
+// Vigenere decrypt A=0 mapping
+function vigenereDecrypt(cipher, key){
+  const A = 'A'.charCodeAt(0);
+  cipher = cipher.toUpperCase().replace(/[^A-Z]/g,'');
+  key = key.toUpperCase().replace(/[^A-Z]/g,'');
+  let out = '';
+  for(let i=0;i<cipher.length;i++){
+    const c = cipher.charCodeAt(i) - A;
+    const k = key.charCodeAt(i % key.length) - A;
+    const p = (c - k + 26) % 26;
+    out += String.fromCharCode(A + p);
+  }
+  return out;
+}
+
+// hex to ascii
+function hexToAscii(hex){
+  const bytes = hex.match(/.{1,2}/g) || [];
+  return bytes.map(b => String.fromCharCode(parseInt(b,16))).join('');
+}
+
+/* Example (for your testing only):
+   hex "4A4652474B4446594657" -> ascii "JFRGKDFYFW"
+   key from timestamps -> "CREST"
+   vigenereDecrypt("JFRGKDFYFW","CREST") -> "HONORBOUND"
+*/
+
+</script>
+</body>
+</html>
