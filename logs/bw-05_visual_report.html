@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>BW-05 Visual Surveillance Report</title>
+<style>
+  body {
+    background: linear-gradient(180deg,#030305 0%,#071018 100%);
+    color: #cfe8df;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+    padding: 28px;
+  }
+  .term {
+    background:#02030a;
+    border:1px solid rgba(127,255,200,0.06);
+    padding:18px;
+    border-radius:8px;
+    max-width:880px;
+    margin:0 auto;
+    box-shadow:0 8px 40px rgba(0,0,0,0.6);
+  }
+  h2 { color:#7be3b2; margin-top:0; }
+  img {
+    max-width:100%;
+    border:1px solid #033;
+    border-radius:6px;
+    display:block;
+    margin:12px 0;
+  }
+  .meta { color:#7be3b2; font-size:0.9rem; }
+  .hint { color:#9aa; font-size:0.9rem; margin-top:10px; }
+</style>
+</head>
+<body>
+<div class="term">
+  <h2>Surveillance Node BW-05 — Visual Report</h2>
+  <p><span class="meta">Status:</span> Feed partially corrupted. Optical data shows no readable subject. Possible phase interference with municipal sensors.</p>
+
+  <img src="images/bw05_camfeed.png" alt="BW-05 camera feed static">
+
+  <p>> Attempting light-level reconstruction...</p>
+  <p>> Reconstruction failed: insufficient visible data.</p>
+
+  <p class="hint">
+    [Technician Note] “Sometimes what you can’t see under normal light tells the real story.
+    Try alternate visual ranges.”
+  </p>
+
+  <p class="meta">End of report — Node BW-05</p>
+</div>
+</body>
+</html>
