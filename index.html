@@ -27,8 +27,8 @@
   }
   h2 {
     color: var(--accent);
-    margin: 0 0 10px 0;
     font-size: 20px;
+    margin-bottom: 8px;
   }
   p, li, a {
     color: var(--text);
@@ -38,9 +38,7 @@
     list-style: none;
     padding-left: 0;
   }
-  li {
-    margin-bottom: 6px;
-  }
+  li { margin-bottom: 6px; }
   a {
     color: var(--accent);
     text-decoration: none;
@@ -63,9 +61,7 @@
     display: inline-block;
     margin-top: 8px;
   }
-  #startBreach a:hover {
-    background: #11385e;
-  }
+  #startBreach a:hover { background: #11385e; }
   #clearToken {
     background: #051018;
     border: 1px solid #073;
@@ -82,22 +78,34 @@
   .blink {
     animation: blink 1s step-end infinite;
   }
-  @keyframes blink {
-    50% { opacity: 0; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  #boot {
+    color: #7ef2b4;
+    font-size: 13px;
+    background: #000;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    line-height: 1.4;
+    min-height: 120px;
+    white-space: pre-wrap;
+    overflow: hidden;
   }
 </style>
 </head>
 <body>
   <div class="term">
-    <h2>Delomina City Surveillance Archive</h2>
-    <p id="lockedNote">[ ACCESS LOCKED ] — please return to breach utility to obtain clearance.</p>
+    <div id="boot"></div>
+    <h2 style="display:none;">Delomina City Surveillance Archive</h2>
+    <p id="lockedNote" style="display:none;">[ ACCESS LOCKED ] — please return to breach utility to obtain clearance.</p>
 
     <ul id="linksList" style="display:none;">
       <li><a id="linkLog1" href="logs/nv-13_field_report.html">NV-13 Field Report</a></li>
       <li><a id="linkVerify" href="verify.html">Phrase Check</a></li>
     </ul>
 
-    <p id="startBreach" style="margin-top:8px;">
+    <p id="startBreach" style="display:none;margin-top:8px;">
       <a href="hack.html">Open Breach Utility</a>
     </p>
 
@@ -107,42 +115,62 @@
   </div>
 
 <script>
-// ---------- Config ----------
-const LINKS = {
-  log1: 'logs/nv-13_field_report.html',
-  verify: 'verify.html'
-};
-
-// ---------- Helpers ----------
-function parseTokenFromHash(){
-  const h = location.hash || '';
-  const m = h.match(/token=([^&]+)/i);
-  return m ? decodeURIComponent(m[1]) : null;
-}
-function getToken(){
-  const fromHash = parseTokenFromHash();
-  if(fromHash){
-    localStorage.setItem('delomina_archive_token', fromHash);
-    history.replaceState(null, '', location.pathname + location.search);
-    return fromHash;
+// ---------- Boot-up Terminal Effect ----------
+const boot = document.getElementById('boot');
+const lines = [
+  '> Initializing Delomina Archive Interface...',
+  '> Establishing encrypted connection to gateway...',
+  '> Verifying external breach token...',
+  '> Access node confirmed.',
+  '> Loading modules: [CORE] [SURVEILLANCE] [ARCHIVE_VIEWER]',
+  '> Boot sequence complete.'
+];
+let i = 0;
+function typeLine() {
+  if (i < lines.length) {
+    boot.textContent += lines[i++] + '\n';
+    setTimeout(typeLine, 500);
+  } else {
+    document.querySelector('h2').style.display = 'block';
+    setupAccessUI();
   }
-  return localStorage.getItem('delomina_archive_token');
 }
-function clearToken(){
-  localStorage.removeItem('delomina_archive_token');
-  location.reload();
-}
+setTimeout(typeLine, 800);
 
-// ---------- UI ----------
-const linksList = document.getElementById('linksList');
-const lockedNote = document.getElementById('lockedNote');
-const startBreach = document.getElementById('startBreach');
-const linkLog1 = document.getElementById('linkLog1');
-const linkVerify = document.getElementById('linkVerify');
-const clearBtn = document.getElementById('clearToken');
-const statusEl = document.getElementById('status');
+// ---------- Main Access Logic ----------
+function setupAccessUI() {
+  const LINKS = {
+    log1: 'logs/nv-13_field_report.html',
+    verify: 'verify.html'
+  };
 
-window.addEventListener('load', ()=>{
+  function parseTokenFromHash(){
+    const h = location.hash || '';
+    const m = h.match(/token=([^&]+)/i);
+    return m ? decodeURIComponent(m[1]) : null;
+  }
+  function getToken(){
+    const fromHash = parseTokenFromHash();
+    if(fromHash){
+      localStorage.setItem('delomina_archive_token', fromHash);
+      history.replaceState(null, '', location.pathname + location.search);
+      return fromHash;
+    }
+    return localStorage.getItem('delomina_archive_token');
+  }
+  function clearToken(){
+    localStorage.removeItem('delomina_archive_token');
+    location.reload();
+  }
+
+  const linksList = document.getElementById('linksList');
+  const lockedNote = document.getElementById('lockedNote');
+  const startBreach = document.getElementById('startBreach');
+  const linkLog1 = document.getElementById('linkLog1');
+  const linkVerify = document.getElementById('linkVerify');
+  const clearBtn = document.getElementById('clearToken');
+  const statusEl = document.getElementById('status');
+
   const token = getToken();
   if(token){
     linksList.style.display = 'block';
@@ -157,13 +185,15 @@ window.addEventListener('load', ()=>{
     lockedNote.style.display = 'block';
     startBreach.style.display = 'block';
     clearBtn.style.display = 'none';
-    statusEl.textContent = '';
   }
-});
 
-clearBtn.addEventListener('click', ()=>{
-  if(confirm('Clear stored access token?')) clearToken();
-});
+  clearBtn.addEventListener('click', ()=>{
+    if(confirm('Clear stored access token?')) clearToken();
+  });
+
+  lockedNote.style.display = 'block';
+  startBreach.style.display = 'block';
+}
 </script>
 </body>
 </html>
