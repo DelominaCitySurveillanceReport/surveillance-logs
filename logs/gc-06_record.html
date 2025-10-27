@@ -6,45 +6,62 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <style>
   :root{--bg:#030305;--accent:#7be3b2;--text:#cfe8df}
-  body{background:linear-gradient(180deg,#030305 0%,#071018 100%);
-       color:var(--text);font-family:ui-monospace,monospace;padding:28px}
-  .term{background:#02030a;border:1px solid rgba(127,255,200,0.06);
-        padding:18px;border-radius:8px;max-width:880px;margin:0 auto;
-        box-shadow:0 8px 40px rgba(0,0,0,0.6)}
+  body{
+    background:linear-gradient(180deg,#030305 0%,#071018 100%);
+    color:var(--text);
+    font-family:ui-monospace,monospace;
+    padding:28px;
+  }
+  .term{
+    background:#02030a;
+    border:1px solid rgba(127,255,200,0.06);
+    padding:18px;
+    border-radius:8px;
+    max-width:880px;
+    margin:0 auto;
+    box-shadow:0 8px 40px rgba(0,0,0,0.6);
+  }
   h2{color:var(--accent);margin:0 0 8px 0}
   p,pre{font-size:14px}
-  img{max-width:100%;border:1px solid #033;border-radius:6px;
-      display:block;margin:12px 0}
+  img{
+    max-width:100%;
+    border:1px solid #033;
+    border-radius:6px;
+    display:block;
+    margin:12px 0;
+  }
   .hint{color:#9aa;margin-top:10px}
   .note{color:#7ef2b4;margin-top:10px;font-size:13px}
-  a.reveal{display:inline-block;margin-top:8px;padding:8px 10px;
-           background:#0a2740;color:#9be;border-radius:6px;
-           text-decoration:none}
 </style>
 </head>
 <body>
   <div class="term">
     <h2>GC-06 — Intercepted Record</h2>
-    <p><strong>Node:</strong> GC-06 / Storage Wing</p>
-    <p class="note">[Stolen media attached — corrupted image below]</p>
+    <pre id="typeblock">
+> Node: GC-06 / Storage Wing
+> Status: Unauthorized extraction detected.
+> Attached media file — partial corruption present.
+
+[Technician note]
+"After it was stolen, GC-06 changed the author to an alias and damaged the record.
+The true name remains hidden — only visible to those who know where to look."
+
+>> Image reconstruction pending...
+    </pre>
 
     <img src="images/gc06_cam_final.png" alt="GC-06 corrupted camera feed">
-
-    <p class="hint">
-      Technician note: “After it was stolen GC-06 changed the author to an alias and damaged the record. ”
-    </p>
   </div>
-</div>
-  <script>
+
+<script>
 // ─── Typewriter + Cursor + Audio Effect ───────────────────────────────
 
 // 1. basic setup
-const pre = document.querySelector('pre');
+const pre = document.getElementById('typeblock');
 const fullText = pre.textContent;
 pre.textContent = ''; // start empty
 let i = 0;
 
-// 2. create a gentle key-click sound in memory
+// 2. gentle key-click sound
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function keyClick(){
   const osc = audioCtx.createOscillator();
@@ -61,16 +78,15 @@ function keyClick(){
 function typeChar(){
   if (i < fullText.length){
     pre.textContent += fullText[i++];
-    keyClick();                    // play tiny click
-    setTimeout(typeChar, 12);      // typing speed (ms per char)
+    keyClick();
+    setTimeout(typeChar, 14);
   } else {
-    // when finished, add blinking cursor
     pre.textContent += "\n_";
     blinkCursor();
   }
 }
 
-// 4. blinking cursor toggle
+// 4. blinking cursor
 function blinkCursor(){
   setInterval(()=>{
     pre.textContent = pre.textContent.endsWith("_")
@@ -79,8 +95,9 @@ function blinkCursor(){
   }, 500);
 }
 
-// 5. slight delay before start
+// 5. start after short delay
 setTimeout(typeChar, 400);
 </script>
 </body>
 </html>
+
