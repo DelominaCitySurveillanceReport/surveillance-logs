@@ -66,54 +66,59 @@
   </div>
 
   <script>
-  // Map of phrases → unlock keys + messages
-  const UNLOCKS = {
-    "found you": {
-      hash: "5ea4a2bf3e61a4183c4f17ec122c8cca528fa25c360322e5afc01fd4ce85d6a2", // SHA-256("found you")
-      key: "alex",
-      msg: "ACCESS GRANTED — Subject file unlocked: CD-11\nReturn to main archive to review."
-    },
-    "dubious": {
-      hash: "b915dfc4b31b97e4a94bb99451e5288d87b5832393d2b3b02b7026e73fda2eb9",
-      key: "dennis",
-      msg: "ACCESS GRANTED — Subject file unlocked: GC-06\nReturn to main archive to review."
+// Map of phrases → unlock keys + messages
+const UNLOCKS = {
+  "found you": {
+    hash: "5ea4a2bf3e61a4183c4f17ec122c8cca528fa25c360322e5afc01fd4ce85d6a2", // SHA-256("found you")
+    key: "alex",
+    msg: "ACCESS GRANTED — Subject file unlocked: CD-11\nReturn to main archive to review."
+  },
+  "dubious": {
+    hash: "b915dfc4b31b97e4a94bb99451e5288d87b5832393d2b3b02b7026e73fda2eb9", // SHA-256("dubious")
+    key: "placeholder", // you can change this later if needed
+    msg: "ACCESS GRANTED — Placeholder file unlocked.\nReturn to main archive to review."
+  },
+  "korat": {
+    hash: "bd88a1b33e580063ff269d7ff53b66d5a32ecb1f2ac0a22ce3b7b39aab28a6f0", // SHA-256("korat")
+    key: "dennis",
+    msg: "ACCESS GRANTED — Subject file unlocked: GC-06\nReturn to main archive to review."
   }
-  };
+};
 
-  async function sha256Hex(text){
-    const enc = new TextEncoder();
-    const data = enc.encode(text);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
-  }
+async function sha256Hex(text){
+  const enc = new TextEncoder();
+  const data = enc.encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return hashArray.map(b => b.toString(16).padStart(2,'0')).join('');
+}
 
-  document.getElementById('check').addEventListener('click', async ()=>{
-    const input = document.getElementById('phrase').value.trim().toLowerCase();
-    const result = document.getElementById('result');
-    if(!input) return;
+document.getElementById('check').addEventListener('click', async ()=>{
+  const input = document.getElementById('phrase').value.trim().toLowerCase();
+  const result = document.getElementById('result');
+  if(!input) return;
 
-    result.style.display = 'block';
-    result.style.color = '#9fe';
-    result.textContent = '> verifying input...';
+  result.style.display = 'block';
+  result.style.color = '#9fe';
+  result.textContent = '> verifying input...';
 
-    const hash = await sha256Hex(input);
-    const match = Object.values(UNLOCKS).find(u => u.hash === hash);
+  const hash = await sha256Hex(input);
+  const match = Object.values(UNLOCKS).find(u => u.hash === hash);
 
-    if(match){
-      // store unlock key
-      const unlocked = JSON.parse(localStorage.getItem('delomina_unlocked') || "[]");
-      if(!unlocked.includes(match.key)){
-        unlocked.push(match.key);
-        localStorage.setItem('delomina_unlocked', JSON.stringify(unlocked));
-      }
-      result.style.color = '#7f7';
-      result.textContent = match.msg + "\n\n> Return to index.html to proceed.";
-    } else {
-      result.style.color = '#f77';
-      result.textContent = "ACCESS DENIED — invalid phrase.";
+  if(match){
+    // store unlock key
+    const unlocked = JSON.parse(localStorage.getItem('delomina_unlocked') || "[]");
+    if(!unlocked.includes(match.key)){
+      unlocked.push(match.key);
+      localStorage.setItem('delomina_unlocked', JSON.stringify(unlocked));
     }
-  });
-  </script>
+    result.style.color = '#7f7';
+    result.textContent = match.msg + "\n\n> Return to index.html to proceed.";
+  } else {
+    result.style.color = '#f77';
+    result.textContent = "ACCESS DENIED — invalid phrase.";
+  }
+});
+</script>
 </body>
 </html>
