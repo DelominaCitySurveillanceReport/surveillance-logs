@@ -17,18 +17,16 @@
   .foot{color:#6f9; font-size:12px; margin-top:12px}
   .hint{color:#9aa; font-size:13px; margin-top:8px}
   a.reveal{display:inline-block; margin-top:12px; padding:8px 10px; background:#0a2740; color:#9be; border-radius:6px; text-decoration:none}
-  small.meta{display:block; color:#556; margin-top:8px}
 </style>
 </head>
 <body>
   <div class="term">
     <h1>Delomina Archives — External Breach Utility</h1>
-    <p class="lead">Simulated access console. This utility will attempt to open a read-only portal into the city archives. Provide the required clearance phrase to proceed.</p>
+    <p class="lead">Simulated access console. Provide the clearance phrase to proceed.</p>
 
     <div id="console" role="log" aria-live="polite">
       <div>> initializing connection to delomina-archive-gateway...</div>
       <div>> handshake OK — ephemeral token acquired</div>
-      <div>> checking outer firewall signatures...</div>
       <div id="log-placeholder">> security prompt ready.</div>
     </div>
 
@@ -44,15 +42,10 @@
   </div>
 
 <script>
-/*
-  Client-side SHA-256 check. The answer currently is "time".
-  SHA256("time") = 336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e
-  If you want to change the expected phrase, replace expectedHash with the SHA-256 of your chosen word.
-*/
+// SHA-256("time")
 const expectedHash = "336074805fc853987abe6f7fe3ad97a6a6f3077a16391fec744f671a015fbd7e";
 
 const consoleEl = document.getElementById('console');
-const logPlaceholder = document.getElementById('log-placeholder');
 const answerInput = document.getElementById('answer');
 const submitBtn = document.getElementById('submit');
 const resultArea = document.getElementById('resultArea');
@@ -67,16 +60,13 @@ function appendLine(text, color){
   consoleEl.scrollTop = consoleEl.scrollHeight;
 }
 
-// small helper to compute sha256 hex in browser
 async function sha256Hex(msg){
   const enc = new TextEncoder();
   const data = enc.encode(msg);
   const buf = await crypto.subtle.digest('SHA-256', data);
-  const arr = Array.from(new Uint8Array(buf));
-  return arr.map(b => b.toString(16).padStart(2,'0')).join('');
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
-// fake progress animation for immersion
 function fakeBreachSequence(success){
   appendLine('bypassing firewall modules...', '#9fe');
   return new Promise(res=>{
@@ -103,9 +93,7 @@ async function checkAnswer(raw){
   if(!norm) return null;
   appendLine('computing integrity hash for input...');
   const h = await sha256Hex(norm);
-  // debug: console.log(h);
-  const ok = (h === expectedHash);
-  return ok;
+  return (h === expectedHash);
 }
 
 submitBtn.addEventListener('click', async ()=>{
@@ -114,29 +102,20 @@ submitBtn.addEventListener('click', async ()=>{
   const ok = await checkAnswer(raw);
   const success = await fakeBreachSequence(ok);
   if(success && ok){
-  appendLine('ACCESS GRANTED — generating access token', '#7f7');
-  const token = 'WATCH-0427'; // this is your chosen access token
-  appendLine('token id: ' + token, '#9fe');
-  appendLine('Redirecting to central index...', '#7ff');
-  resultArea.innerHTML = "<div style='color:#7ef2b4; margin-top:8px'>ACCESS GRANTED<br/>Redirecting...</div>";
-  setTimeout(()=>{
-    // redirect to index.html and pass token in URL fragment
-    window.location.href = 'index.html#token=' + encodeURIComponent(token);
-  }, 1500);
-} else {
+    appendLine('ACCESS GRANTED — opening portal...', '#7f7');
+    localStorage.setItem('delomina_archive_token', 'unlocked');
+    appendLine('token granted. redirecting to main archive...', '#9fe');
+    setTimeout(()=> window.location.href = 'index.html#token=unlocked', 1500);
+  } else {
     failCount++;
     appendLine('ACCESS DENIED', '#f55');
     if(failCount >= 3){
       appendLine('security hint: the thing you seek slips through every hand — think of seconds and kings', '#9aa');
     }
-    // small deterrent: disable briefly
-    submitBtn.disabled = true;
-    setTimeout(()=> submitBtn.disabled = false, 1600);
   }
 });
 
-// allow hitting Enter
-answerInput.addEventListener('keydown', (e)=>{
+answerInput.addEventListener('keydown', e=>{
   if(e.key === 'Enter') submitBtn.click();
 });
 </script>
