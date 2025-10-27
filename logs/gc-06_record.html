@@ -26,21 +26,58 @@
   <div class="term">
     <h2>GC-06 — Intercepted Record</h2>
     <p><strong>Node:</strong> GC-06 / Storage Wing</p>
-    <p class="note">[Extracted media attached — corrupted image below]</p>
+    <p class="note">[Stolen media attached — corrupted image below]</p>
 
     <img src="images/gc06_cam_final.png" alt="GC-06 corrupted camera feed">
 
     <p class="hint">
-      Technician note: “Noise patterns don’t always lie.  
-      Check beneath the static — some systems hide data where only  
-      forensic viewers would look.”
-    </p>
-
-    <p class="note">
-      For verification, submit recovered phrase via the  
-      <a class="reveal" href="../verify.html">Verification Console</a>.
+      Technician note: “After it was stolen GC-06 changed the author to an alias and damaged the record. ”
     </p>
   </div>
+  <script>
+// ─── Typewriter + Cursor + Audio Effect ───────────────────────────────
+const pre = document.querySelector('pre');
+const fullText = pre.textContent.trim();
+pre.textContent = ''; // start empty
+let i = 0;
+
+// Create subtle key-click sound
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function keyClick(){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(600 + Math.random()*200, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.05);
+}
+
+// Typewriter effect
+function typeChar(){
+  if (i < fullText.length){
+    pre.textContent += fullText[i++];
+    keyClick();
+    setTimeout(typeChar, 15); // adjust speed (ms per char)
+  } else {
+    pre.textContent += "\n_";
+    blinkCursor();
+  }
+}
+
+// Blinking cursor
+function blinkCursor(){
+  setInterval(()=>{
+    pre.textContent = pre.textContent.endsWith("_")
+      ? pre.textContent.slice(0,-1) + " "
+      : pre.textContent.slice(0,-1) + "_";
+  }, 500);
+}
+
+// Start effect
+setTimeout(typeChar, 400);
+</script>
 </body>
 </html>
 
