@@ -34,28 +34,32 @@
 <body>
   <div class="term">
     <h2>Delomina City Surveillance Archive</h2>
-    <p id="lockedNote">Archive partially restricted. Use the <a href="verify.html">Verification Console</a> to unlock classified files.</p>
 
-    <ul id="fileList">
-      <li><a href="logs/nv-13_field_report.html">[NV-13] Field Report</a></li>
-      <li><a href="logs/bw-05_visual_report.html">[BW-05] Visual Report</a></li>
-      <!-- Hidden files will appear here dynamically -->
-    </ul>
+    <div id="locked">
+      <p>ACCESS LOCKED — breach token required.</p>
+      <p><a href="hack.html" style="color:#7be3b2;">Launch Breach Utility</a></p>
+    </div>
 
-    <p><button id="clearToken" style="display:none;">Clear access data</button></p>
+    <div id="unlocked" style="display:none;">
+      <p id="lockedNote">Archive partially restricted. Use the <a href="verify.html">Verification Console</a> to unlock classified files.</p>
+      <ul id="fileList">
+        <li><a href="logs/nv-13_field_report.html">[NV-13] Field Report</a></li>
+        <li><a href="logs/bw-05_visual_report.html">[BW-05] Visual Report</a></li>
+      </ul>
+      <p><button id="clearToken" style="display:none;">Clear access data</button></p>
+    </div>
   </div>
 
   <script>
   const FILES = {
-    alex: { label: "[CD-11] Subject File — Access Granted", href: "logs/cd-11_file.html" }
-    // Add more later: orla, dennis, etc.
+    alex: { label: "[CD-11] Subject File — Access Granted", href: "logs/cd-11_file.html" },
+    dennis: { label: "[G-C07] Subject File — Access Granted", href: "logs/gc-07_file.html" }
   };
 
   function renderUnlocked(){
     const list = document.getElementById('fileList');
     const unlocked = JSON.parse(localStorage.getItem('delomina_unlocked') || "[]");
     const clearBtn = document.getElementById('clearToken');
-
     if(unlocked.length > 0) clearBtn.style.display = 'inline-block';
 
     unlocked.forEach(key=>{
@@ -71,13 +75,28 @@
   }
 
   document.getElementById('clearToken').addEventListener('click', ()=>{
-    if(confirm("Clear all stored unlocks?")) {
+    if(confirm("Clear all stored unlocks and access token?")){
       localStorage.removeItem('delomina_unlocked');
+      localStorage.removeItem('delomina_archive_token');
       location.reload();
     }
   });
 
-  renderUnlocked();
+  // Token gate
+  window.addEventListener('load', ()=>{
+    const token = localStorage.getItem('delomina_archive_token');
+    const locked = document.getElementById('locked');
+    const unlocked = document.getElementById('unlocked');
+
+    if(token === 'unlocked'){
+      locked.style.display = 'none';
+      unlocked.style.display = 'block';
+      renderUnlocked();
+    } else {
+      locked.style.display = 'block';
+      unlocked.style.display = 'none';
+    }
+  });
   </script>
 </body>
 </html>
