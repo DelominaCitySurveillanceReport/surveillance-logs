@@ -29,35 +29,44 @@
   }
   .meta { color:#7be3b2; font-size:0.9rem; }
   .hint { color:#9aa; font-size:0.9rem; margin-top:10px; }
+  pre {
+    white-space: pre-wrap;
+    color: #7be3b2;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
 </style>
 </head>
 <body>
 <div class="term">
   <h2>Surveillance Node BW-05 — Visual Report</h2>
-  <p><span class="meta">Status:</span> Feed partially corrupted. Optical data shows no readable subject. Possible phase interference with municipal sensors.</p>
+  
+  <!-- Typewriter text area -->
+  <pre>
+> Feed partially corrupted.
+> Optical data shows no readable subject.
+> Possible phase interference with municipal sensors.
+
+> Attempting light-level reconstruction...
+> Reconstruction failed: insufficient visible data.
+
+[Technician Note] “Sometimes what you can’t see under normal light tells the real story.
+Try alternate visual ranges.”
+
+End of report — Node BW-05
+  </pre>
 
   <img src="images/bw05_camfeed.png" alt="BW-05 camera feed static">
-
-  <p>> Attempting light-level reconstruction...</p>
-  <p>> Reconstruction failed: insufficient visible data.</p>
-
-  <p class="hint">
-    [Technician Note] “Sometimes what you can’t see under normal light tells the real story.
-    Try alternate visual ranges.”
-  </p>
-
-  <p class="meta">End of report — Node BW-05</p>
 </div>
-  <script>
-// ─── Typewriter + Cursor + Audio Effect ───────────────────────────────
 
-// 1. basic setup
+<script>
+// ─── Typewriter + Cursor + Audio Effect ───────────────────────────────
 const pre = document.querySelector('pre');
-const fullText = pre.textContent;
+const fullText = pre.textContent.trim();
 pre.textContent = ''; // start empty
 let i = 0;
 
-// 2. create a gentle key-click sound in memory
+// Create subtle key-click sound
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 function keyClick(){
   const osc = audioCtx.createOscillator();
@@ -70,20 +79,19 @@ function keyClick(){
   osc.stop(audioCtx.currentTime + 0.05);
 }
 
-// 3. typing loop
+// Typewriter effect
 function typeChar(){
   if (i < fullText.length){
     pre.textContent += fullText[i++];
-    keyClick();                    // play tiny click
-    setTimeout(typeChar, 12);      // typing speed (ms per char)
+    keyClick();
+    setTimeout(typeChar, 15); // adjust speed (ms per char)
   } else {
-    // when finished, add blinking cursor
     pre.textContent += "\n_";
     blinkCursor();
   }
 }
 
-// 4. blinking cursor toggle
+// Blinking cursor
 function blinkCursor(){
   setInterval(()=>{
     pre.textContent = pre.textContent.endsWith("_")
@@ -92,8 +100,9 @@ function blinkCursor(){
   }, 500);
 }
 
-// 5. slight delay before start
+// Start effect
 setTimeout(typeChar, 400);
 </script>
 </body>
 </html>
+
