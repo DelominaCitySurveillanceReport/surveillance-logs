@@ -17,14 +17,6 @@
       display:block;margin:12px 0}
   .hint{color:#9aa;margin-top:10px}
   .note{color:#7ef2b4;margin-top:10px;font-size:13px}
-  input{width:100%;padding:10px;border-radius:6px;
-        border:1px solid #073;background:#021018;color:var(--text);
-        margin-top:8px}
-  button{padding:8px 12px;background:#073;border:0;border-radius:6px;
-         color:#001;margin-top:8px;cursor:pointer;font-weight:700}
-  .result{margin-top:12px;padding:10px;border-radius:6px;display:none}
-  .ok{background:#072;color:#cfe}
-  .bad{background:#420;color:#ffd}
   a.reveal{display:inline-block;margin-top:8px;padding:8px 10px;
            background:#0a2740;color:#9be;border-radius:6px;
            text-decoration:none}
@@ -36,7 +28,6 @@
     <p><strong>Node:</strong> GC-06 / Storage Wing</p>
     <p class="note">[Extracted media attached — corrupted image below]</p>
 
-    <!-- your hidden-metadata image -->
     <img src="images/gc06_cam_final.png" alt="GC-06 corrupted camera feed">
 
     <p class="hint">
@@ -45,47 +36,11 @@
       forensic viewers would look.”
     </p>
 
-    <p>Enter recovered authorization phrase (case-insensitive):</p>
-    <input id="codebox" placeholder="enter phrase (example: KORAT)" />
-    <button id="submit">Submit</button>
-
-    <div id="result" class="result"></div>
-    <div id="next" style="margin-top:12px"></div>
+    <p class="note">
+      For verification, submit recovered phrase via the  
+      <a class="reveal" href="../verify.html">Verification Console</a>.
+    </p>
   </div>
-
-<script>
-// expected final answer
-const EXPECTED = "korat";
-
-function addUnlocked(key){
-  const arr = JSON.parse(localStorage.getItem('delomina_unlocked') || "[]");
-  if(!arr.includes(key)) arr.push(key);
-  localStorage.setItem('delomina_unlocked', JSON.stringify(arr));
-}
-
-document.getElementById('submit').addEventListener('click', ()=>{
-  const raw = (document.getElementById('codebox').value || '').trim().toLowerCase();
-  const res = document.getElementById('result');
-  res.style.display = 'block';
-  if(!raw){
-    res.className = 'result bad';
-    res.textContent = 'Enter a phrase.';
-    return;
-  }
-  if(raw === EXPECTED){
-    addUnlocked('dennis');
-    res.className = 'result ok';
-    res.innerHTML = 'ACCESS ACCEPTED — GC-06 UNLOCKED.<br/>Return to the archive hub or continue to subject file.';
-    document.getElementById('next').innerHTML = `
-      <a class="reveal" href="../index.html">Return to Archive Hub</a>
-      &nbsp;
-      <a class="reveal" href="dennis_file.html">Open GC-06 Subject File</a>
-    `;
-  } else {
-    res.className = 'result bad';
-    res.textContent = 'Incorrect phrase.';
-  }
-});
-</script>
 </body>
 </html>
+
