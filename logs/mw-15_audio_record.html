@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>MW-15 — Surveillance Audio Capture</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  :root{--bg:#030305;--accent:#7be3b2;--text:#cfe8df}
+  body{background:linear-gradient(180deg,#030305 0%,#071018 100%);
+       color:var(--text);font-family:ui-monospace,monospace;padding:28px}
+  .term{background:#02030a;border:1px solid rgba(127,255,200,0.06);
+        padding:18px;border-radius:8px;max-width:880px;margin:0 auto;
+        box-shadow:0 8px 40px rgba(0,0,0,0.6)}
+  h2{color:var(--accent);margin:0 0 8px 0}
+  p,pre{font-size:14px}
+  img{max-width:100%;border:1px solid #033;border-radius:6px;
+      display:block;margin:12px 0}
+  audio{width:100%; margin:12px 0;}
+  .hint{color:#9aa;margin-top:10px}
+  .note{color:#7ef2b4;margin-top:10px;font-size:13px}
+</style>
+</head>
+<body>
+  <div class="term">
+    <h2>MW-15 — Surveillance Audio Capture</h2>
+    <p><strong>Node:</strong> MW-15 / Residential Perimeter</p>
+    <p class="note">[Unauthorized audio signature detected]</p>
+
+    <audio controls src="../audio/mw15_guitar.wav"></audio>
+
+    <p>> Running spectral analysis…</p>
+    <p>> Detected harmonic pattern — nonstandard tonal progression.</p>
+    <p>> Cross-referencing with known melodic databases… <span style="color:#999">no match.</span></p>
+
+    <p class="hint">[Technician note]  
+    “The six same notes were played again and again.  
+    261-391-293-440-329-493.  
+    Keep an eye on their mental state.”</p>
+
+    <p class="note">End of Record — MW-15</p>
+  </div>
+
+<script>
+// ─── Typewriter + Cursor + Audio Effect ───────────────────────────────
+
+// 1. basic setup
+const pre = document.querySelector('pre');
+const fullText = pre ? pre.textContent : '';
+if(pre) pre.textContent = ''; // start empty
+let i = 0;
+
+// 2. create a gentle key-click sound in memory
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function keyClick(){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(600 + Math.random()*200, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.05);
+}
+
+// 3. typing loop
+function typeChar(){
+  if (!pre) return;
+  if (i < fullText.length){
+    pre.textContent += fullText[i++];
+    keyClick();
+    setTimeout(typeChar, 12);
+  } else {
+    pre.textContent += "\n_";
+    blinkCursor();
+  }
+}
+
+// 4. blinking cursor toggle
+function blinkCursor(){
+  if (!pre) return;
+  setInterval(()=>{
+    pre.textContent = pre.textContent.endsWith("_")
+      ? pre.textContent.slice(0,-1) + " "
+      : pre.textContent.slice(0,-1) + "_";
+  }, 500);
+}
+
+// 5. slight delay before start
+setTimeout(typeChar, 400);
+</script>
+</body>
+</html>
