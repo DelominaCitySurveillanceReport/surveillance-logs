@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>BX-14 — Audio-Visual Monitor</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  :root{--bg:#030305;--accent:#7be3b2;--text:#cfe8df;}
+  body{
+    background:linear-gradient(180deg,#030305 0%,#071018 100%);
+    color:var(--text);
+    font-family:ui-monospace,monospace;
+    padding:28px;
+  }
+  .term{
+    background:#02030a;
+    border:1px solid rgba(127,255,200,0.06);
+    padding:18px;
+    border-radius:8px;
+    max-width:880px;
+    margin:0 auto;
+    box-shadow:0 8px 40px rgba(0,0,0,0.6);
+  }
+  h2{color:var(--accent);margin:0 0 8px 0;}
+  p,pre{font-size:14px;line-height:1.5;}
+  .morse{
+    font-weight:bold;
+    color:#7be3b2;
+    letter-spacing:2px;
+    margin:10px 0;
+    animation:flicker 1.5s infinite steps(2);
+  }
+  @keyframes flicker {
+    0%,19%,21%,23%,25%,54%,56%,100%{opacity:1;}
+    20%,22%,24%,55%{opacity:.3;}
+  }
+  .hint{color:#9aa;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="term">
+  <h2>BX-14 — Audio-Visual Monitor</h2>
+  <p><strong>Node:</strong> BX-14 / Lower City Echo Surveillance</p>
+  <p>Audio feed analysis produced visual anomalies in the signal trace:</p>
+
+  <pre>
+> Signal captured.
+> Decoding pattern stream:
+  <span class="morse">. -. -.. . .- .-. -- . -. -</span>
+> Output incomplete — interference persists.
+  </pre>
+
+  <p class="hint">[Technician Note] “The pulse repeats nine units... it’s trying to say something.”</p>
+  <p>End of report — BX-14</p>
+</div>
+
+<script>
+// ─── Typewriter + Cursor + Audio Effect ───────────────────────────────
+
+// 1. basic setup
+const pre = document.querySelector('pre');
+const fullText = pre.textContent;
+pre.textContent = ''; // start empty
+let i = 0;
+
+// 2. create a gentle key-click sound in memory
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function keyClick(){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(600 + Math.random()*200, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.05);
+}
+
+// 3. typing loop
+function typeChar(){
+  if (i < fullText.length){
+    pre.textContent += fullText[i++];
+    keyClick();                    // play tiny click
+    setTimeout(typeChar, 12);      // typing speed (ms per char)
+  } else {
+    // when finished, add blinking cursor
+    pre.textContent += "\n_";
+    blinkCursor();
+  }
+}
+
+// 4. blinking cursor toggle
+function blinkCursor(){
+  setInterval(()=>{
+    pre.textContent = pre.textContent.endsWith("_")
+      ? pre.textContent.slice(0,-1) + " "
+      : pre.textContent.slice(0,-1) + "_";
+  }, 500);
+}
+
+// 5. slight delay before start
+setTimeout(typeChar, 400);
+
+// ─── Optional: Morse Sound Playback ───────────────────────────────
+function playMorse(){
+  const morse = document.querySelector('.morse').textContent.trim();
+  let j = 0;
+  function playNext(){
+    if(j < morse.length){
+      const c = morse[j++];
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = 700;
+      gain.gain.value = 0.03;
+      osc.connect(gain).connect(audioCtx.destination);
+      if(c === ".") osc.start(), osc.stop(audioCtx.currentTime + 0.1);
+      if(c === "-") osc.start(), osc.stop(audioCtx.currentTime + 0.3);
+      setTimeout(playNext, 150);
+    }
+  }
+  setTimeout(playNext, 1000);
+}
+playMorse();
+</script>
+</body>
+</html>
