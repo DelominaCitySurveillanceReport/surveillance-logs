@@ -63,7 +63,19 @@ const fullText = pre.textContent.trim();
 pre.textContent = ''; // start empty
 let i = 0;
 
-
+// 2. create a gentle key-click sound in memory
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function keyClick(){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(600 + Math.random()*200, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.05);
+}
+  
 // Typewriter effect
 function typeChar(){
   if (i < fullText.length){
