@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>KR-09 — Cognitive Field Archive</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  :root{--bg:#030305;--accent:#7be3b2;--text:#cfe8df}
+  body{
+    background:linear-gradient(180deg,#030305 0%,#071018 100%);
+    color:var(--text);
+    font-family:ui-monospace,monospace;
+    padding:28px;
+  }
+  .term{
+    background:#02030a;border:1px solid rgba(127,255,200,0.06);
+    padding:18px;border-radius:8px;max-width:980px;margin:0 auto;
+    box-shadow:0 8px 40px rgba(0,0,0,0.6)
+  }
+  h2{color:var(--accent);margin:0 0 8px 0}
+  p,li{font-size:14px;line-height:1.45}
+  .grid{
+    margin-top:14px;
+    background:#000;padding:10px;border-radius:6px;overflow:auto;
+    border:1px solid rgba(127,255,200,0.03)
+  }
+  table.scramble{border-collapse:collapse;width:100%;max-width:760px}
+  table.scramble td{padding:6px 8px;border:1px dashed rgba(127,255,200,0.03);
+    text-align:center;color:#9aa;font-weight:700}
+  .controls{margin-top:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  label{display:block;color:#9be;font-size:13px;margin-bottom:6px}
+  input[type="text"]{width:100%;padding:8px;border-radius:6px;border:1px solid #073;background:#041018;color:var(--text)}
+  button{padding:10px 12px;border-radius:6px;border:0;background:var(--accent);color:#000;font-weight:800;cursor:pointer}
+  .result{margin-top:14px;padding:10px;border-radius:6px;background:#02150e;color:#9fe;white-space:pre-wrap;display:none}
+  .hint{color:#9aa;margin-top:10px;font-size:13px}
+  small.meta{display:block;color:#899;margin-top:8px}
+  .revealWord{font-family:inherit;font-size:28px;color:#7be3b2;font-weight:900;letter-spacing:3px;margin-top:12px}
+  .thin{color:#6f9;font-size:13px;margin-top:8px}
+  .danger{color:#f66}
+  .row-head{color:#7be3b2;font-weight:800}
+  /* typewriter cursor for final reveal */
+  .cursor { display:inline-block; width:10px; background:#7be3b2; margin-left:6px; animation:blink 800ms steps(1) infinite; height:1em; vertical-align:middle;}
+  @keyframes blink { 50% { opacity:0 } }
+  /* small responsive */
+  @media (max-width:720px){
+    .controls{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+  <div class="term" role="main">
+    <h2>KR-09 — ARCHITECTURAL COGNITION LOG</h2>
+
+    <p><strong>Registry:</strong> KR-09 / Cognitive Research — Access: PROVISIONAL</p>
+
+    <p class="thin">This file behaves as a cognitive aggregator. It will accept prior archive phrases, correlate them with node identifiers, and attempt a semantic convergence. Only complete, correct inputs will unlock the primary key.</p>
+
+    <div class="grid" aria-hidden="false">
+      <strong>Evidence snapshot:</strong>
+      <table class="scramble" aria-hidden="true">
+        <!-- Purely decorative scrambled grid: will 'resolve' visually when correct -->
+        <tbody id="scrambleBody">
+          <!-- built by JS -->
+        </tbody>
+      </table>
+
+      <p class="hint">Operator instructions: paste the verification phrases you recovered from each node into the matching field below. All phrases are case-insensitive. When the archive verifies every entry, the convergence vector will reveal itself.</p>
+
+      <form id="masterForm" onsubmit="return false" aria-label="Master cipher inputs">
+        <div class="controls" id="controlsGrid">
+          <!-- inputs populated by JS -->
+        </div>
+
+        <div style="margin-top:12px">
+          <button id="verifyBtn" type="button">VERIFY ARCHIVE</button>
+          <button id="hintBtn" type="button" style="margin-left:10px;background:#0a2740;color:#9be">REQUEST TRACE HINT</button>
+        </div>
+      </form>
+
+      <div id="result" class="result" role="status" aria-live="polite"></div>
+      <div id="finalReveal" style="display:none">
+        <div class="revealWord" id="finalWord"></div>
+        <p class="thin">Primary vector confirmed. Download restricted summary below.</p>
+        <p style="margin-top:8px"><a id="downloadLink" href="#" class="thin" style="color:#9be;text-decoration:none">Download: KR-09_convergence_report.txt</a></p>
+      </div>
+    </div>
+
+    <small class="meta">Notes: This console requires that prior nodes be solved in their own contexts. The archive will not guess missing fragments.</small>
+  </div>
+
+<script>
+// ------------- CONFIG: expected phrases (lowercase, trimmed) -------------
+const EXPECTED = {
+  "NV-13": "time",           // Estella
+  "CD-11": "found you",      // Alex
+  "GC-06": "dubious",        // Dennis
+  "NT-07": "korat",          // Ivan
+  "WC-04": "relinquish",     // Remy
+  "BX-14": "endearment",     // Jixin
+  "MW-15": "shadow",         // Yin
+  "AC-16": "release"         // Jidian (Jade)
+};
+
+// order to display (can be mixed to be less obvious)
+const NODE_ORDER = ["NV-13","CD-11","GC-06","NT-07","WC-04","BX-14","MW-15","AC-16"];
+
+// decorative scrambled grids shown until solved
+const SCRAMBLE_TEMPLATES = [
+  ["T","R","X","Q","V","N","P","L"],
+  ["O","A","B","C","K","M","E","S"],
+  ["L","I","G","H","T","Y","U","W"],
+  ["Z","D","F","J","R","O","N","C"],
+  ["E","X","P","L","O","R","E","R"],
+  ["S","E","R","I","A","L","I","Z"],
+  ["M","A","T","R","I","X","K","Q"],
+  ["P","H","A","S","E","R","O","T"]
+];
+
+// final convergence word and file contents
+const FINAL_WORD = "CONVERGENCE";
+const REPORT_TEXT = `KR-09 CONVERGENCE REPORT
+Primary conclusion: convergent anomaly detected across archived subjects.
+Vector: ${FINAL_WORD}
+— End of synthetic report —`;
+
+// ------------- build UI -------------
+const controlsGrid = document.getElementById('controlsGrid');
+const scrambleBody = document.getElementById('scrambleBody');
+
+function buildScramble(){
+  scrambleBody.innerHTML = '';
+  SCRAMBLE_TEMPLATES.forEach(row=>{
+    const tr = document.createElement('tr');
+    row.forEach(cell=>{
+      const td = document.createElement('td');
+      td.textContent = cell;
+      tr.appendChild(td);
+    });
+    scrambleBody.appendChild(tr);
+  });
+}
+function buildControls(){
+  controlsGrid.innerHTML = '';
+  NODE_ORDER.forEach(node=>{
+    const wrapper = document.createElement('div');
+    wrapper.style.minWidth = '0';
+    const lab = document.createElement('label');
+    lab.innerHTML = `<span class="row-head">${node}</span>`;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.dataset.node = node;
+    input.placeholder = 'enter phrase for ' + node;
+    wrapper.appendChild(lab);
+    wrapper.appendChild(input);
+    controlsGrid.appendChild(wrapper);
+  });
+}
+
+// ------------- verification logic -------------
+function normalize(s){ return String(s||'').trim().toLowerCase(); }
+
+function verifyAll(){
+  const inputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  const missing = [];
+  const wrong = [];
+  const given = {};
+  for(const inp of inputs){
+    const node = inp.dataset.node;
+    const val = normalize(inp.value);
+    if(!val){ missing.push(node); continue; }
+    given[node] = val;
+    if(val !== EXPECTED[node]){
+      wrong.push(node);
+    }
+  }
+
+  const resultEl = document.getElementById('result');
+  resultEl.style.display = 'block';
+
+  if(missing.length){
+    resultEl.style.color = '#f77';
+    resultEl.textContent = `INCOMPLETE — missing phrases for: ${missing.join(', ')}.`;
+    return false;
+  }
+  if(wrong.length){
+    resultEl.style.color = '#f77';
+    resultEl.textContent = `VERIFICATION FAILED — incorrect phrase(s): ${wrong.join(', ')}.`;
+    // add deterrent delay
+    lockInputs(1200);
+    return false;
+  }
+
+  // everything correct — reveal convergence
+  resultEl.style.color = '#7f7';
+  resultEl.textContent = '> verification complete — assembling convergence vector...';
+  setTimeout(()=> revealConvergence(given), 900);
+  return true;
+}
+
+function lockInputs(ms){
+  const btn = document.getElementById('verifyBtn');
+  btn.disabled = true;
+  setTimeout(()=> btn.disabled = false, ms);
+}
+
+// ------------- reveal animation / assembly-------------
+function revealConvergence(givenMap){
+  // visually reorder the scramble table to "resolve"
+  // simple animation: replace rows with letters that suggest 'CONVERGENCE' diagonal
+  scrambleBody.innerHTML = '';
+  const size = 8;
+  // create rows with letters such that diagonal reads CONVERGE + CE tail
+  // We'll map diagonal positions to FINAL_WORD letters, pad remainder
+  const diagLetters = FINAL_WORD.split(''); // length 11, but grid 8 -> we'll show first 8 letters then reveal rest
+  // Put CONVERGEN prefix on the diagonal (first 8 letters)
+  const diagUsed = diagLetters.slice(0,8); // ["C","O","N","V","E","R","G","E"]
+  for(let r=0;r<size;r++){
+    const tr = document.createElement('tr');
+    for(let c=0;c<size;c++){
+      const td = document.createElement('td');
+      if(c === r){
+        td.textContent = diagUsed[r];
+        td.style.color = '#7be3b2';
+        td.style.fontWeight = '900';
+      } else {
+        td.textContent = randomLetter();
+        td.style.opacity = 0.45;
+      }
+      tr.appendChild(td);
+    }
+    scrambleBody.appendChild(tr);
+  }
+
+  // show final text after a short dramatic pause
+  const resultEl = document.getElementById('result');
+  resultEl.textContent = '> convergence assembled — primary vector ready.';
+  setTimeout(()=> {
+    // reveal the final full word (animate typewriter)
+    document.getElementById('finalReveal').style.display = 'block';
+    typeWriterReveal(FINAL_WORD, document.getElementById('finalWord'), 80, ()=>{
+      // prepare download link: create blob from REPORT_TEXT
+      const blob = new Blob([REPORT_TEXT], {type:'text/plain'});
+      const url = URL.createObjectURL(blob);
+      const a = document.getElementById('downloadLink');
+      a.href = url;
+      a.download = 'KR-09_convergence_report.txt';
+      // final result message
+      resultEl.textContent = '> primary vector confirmed. Download available.';
+    });
+  }, 900);
+}
+
+// small random letter helper
+function randomLetter(){
+  const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  return alpha[Math.floor(Math.random()*alpha.length)];
+}
+
+// typewriter reveal for the final word
+function typeWriterReveal(text, el, delay=80, cb){
+  el.textContent = '';
+  let i = 0;
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  el.appendChild(cursor);
+  function step(){
+    if(i < text.length){
+      cursor.insertAdjacentText('beforebegin', text[i++]);
+      setTimeout(step, delay + Math.random()*40);
+    } else {
+      // stop cursor and call cb
+      cursor.remove();
+      if(cb) cb();
+    }
+  }
+  setTimeout(step, 120);
+}
+
+// simple trace hint mechanism (limited uses)
+let hintsUsed = 0;
+document.getElementById('hintBtn').addEventListener('click', ()=>{
+  const r = confirm('Request a trace hint? This will reveal a single node hint (limited). Proceed?');
+  if(!r) return;
+  if(hintsUsed >= 2){
+    alert('Trace hint quota exhausted.');
+    return;
+  }
+  hintsUsed++;
+  const nodes = Object.keys(EXPECTED);
+  // pick an unsolved node by seeing which input is empty/wrong
+  const inputs = Array.from(document.querySelectorAll('input[type="text"]'));
+  let target = null;
+  for(const node of nodes){
+    const inp = inputs.find(i=>i.dataset.node === node);
+    const v = inp && normalize(inp.value);
+    if(!v || v !== EXPECTED[node]) { target = node; break; }
+  }
+  if(!target) target = nodes[0];
+  // show a subtle hint
+  const hintMap = {
+    "NV-13":"Think of what binds loops together.",
+    "CD-11":"An accusatory discovery — two words.",
+    "GC-06":"A single-word suspicion, not praise.",
+    "NT-07":"A short, exotic animal name (cat-breed).",
+    "WC-04":"A formal, yielding command.",
+    "BX-14":"An emotional noun — a label of affection.",
+    "MW-15":"A single-word cloak; darkness in six letters.",
+    "AC-16":"Letting go — one word."
+  };
+  alert(`TRACE HINT — ${target}: ${hintMap[target]}`);
+});
+
+// ui wiring
+buildScramble();
+buildControls();
+
+document.getElementById('verifyBtn').addEventListener('click', verifyAll);
+
+// preload: fill sample placeholders? (No — players must enter)
+</script>
+
+<!-- Hidden operator note (inspect to find) -->
+<!--
+  KR-09 OPERATOR: This console correlates solved node phrases to their registry codes.
+  Order is irrelevant for input; the archive will validate presence and correctness.
+  Final vector: CONVERGENCE
+-->
+</body>
+</html>
