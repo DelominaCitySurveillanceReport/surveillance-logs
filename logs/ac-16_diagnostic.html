@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>AC-16 — Dream State Diagnostic</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  :root{--bg:#030305;--accent:#7be3b2;--text:#cfe8df}
+  body{background:linear-gradient(180deg,#030305 0%,#071018 100%);
+       color:var(--text);font-family:ui-monospace,monospace;padding:28px}
+  .term{background:#02030a;border:1px solid rgba(127,255,200,0.06);
+        padding:18px;border-radius:8px;max-width:880px;margin:0 auto;
+        box-shadow:0 8px 40px rgba(0,0,0,0.6)}
+  h2{color:var(--accent);margin:0 0 8px 0}
+  p,pre{font-size:14px;white-space:pre-wrap}
+  .hint{color:#9aa;margin-top:10px}
+  .note{color:#7ef2b4;margin-top:10px;font-size:13px}
+  span.hl{color:#7be3b2}
+</style>
+</head>
+<body>
+<div class="term">
+  <h2>AC-16 — Dream-State Diagnostic</h2>
+  <p><strong>Node:</strong> AC-16 / Subject Sleep Observation</p>
+  <p class="note">[Transmission partially reconstructed — fragments of internal imagery remain]</p>
+
+  <pre>
+[4]: <span class="hl">Among</span> the static, whispers of color coil into thought.
+[8]: <span class="hl">Clouds</span> shimmer in fractured glass horizons.
+[1]: <span class="hl">Dewdrops</span> fall upward, burning with moonlight.
+[6]: <span class="hl">Echoes</span> of distant bells pierce the pulse.
+[5]: <span class="hl">Mirrors</span> rearrange themselves — faces within faces.
+[2]: <span class="hl">Roots</span> pulse through walls of white.
+[3]: <span class="hl">Eons</span> pass between breaths.
+[7]: <span class="hl">Rivers</span> of gold thread through the dark, hoarding every reflection.
+  </pre>
+
+  <p>> Reconstruction complete. Sequence stabilized at 0.94 correlation index.</p>
+
+  <p class="hint">[Technician note] “It keeps repeating and repeating.”</p>
+
+  <p class="note">End of Diagnostic — Node AC-16</p>
+</div>
+
+<script>
+// ─── Typewriter + Cursor + Audio Effect ───────────────────────────────
+
+// 1. basic setup
+const pre = document.querySelector('pre');
+const fullText = pre.textContent;
+pre.textContent = ''; // start empty
+let i = 0;
+
+// 2. create a gentle key-click sound in memory
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function keyClick(){
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = "square";
+  osc.frequency.setValueAtTime(600 + Math.random()*200, audioCtx.currentTime);
+  gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.05);
+}
+
+// 3. typing loop
+function typeChar(){
+  if (i < fullText.length){
+    pre.textContent += fullText[i++];
+    keyClick();                    
+    setTimeout(typeChar, 12);      
+  } else {
+    pre.textContent += "\n_";
+    blinkCursor();
+  }
+}
+
+// 4. blinking cursor toggle
+function blinkCursor(){
+  setInterval(()=>{
+    pre.textContent = pre.textContent.endsWith("_")
+      ? pre.textContent.slice(0,-1) + " "
+      : pre.textContent.slice(0,-1) + "_";
+  }, 500);
+}
+
+// 5. slight delay before start
+setTimeout(typeChar, 400);
+</script>
+</body>
+</html>
